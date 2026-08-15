@@ -1,19 +1,33 @@
 package org.example;
 
 import org.example.config.DBConnection;
-
+import org.example.dao.*;
+import org.example.model.*;
+import java.util.List;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            Connection connection = DBConnection.getConnection();
-            System.out.println("Connected to database successfully");
-        }catch (SQLException e){
-            System.out.println("Connection Failed");
+        DepartmentDAO departmentDAO = new DepartmentDAO();
+
+        // Add
+        departmentDAO.addDepartment("IT", "Chennai");
+        departmentDAO.addDepartment("IT", "Chenn");
+        // View by ID
+        Department department = departmentDAO.getDepartmentById(1);
+
+        if (department != null) {
+            System.out.println(department);
+        } else {
+            System.out.println("Department not found");
         }
 
-        System.out.println("hello\n"+"world");
+        // View all
+        List<Department> departments = departmentDAO.getAllDepartments();
+
+        for (Department d : departments) {
+            System.out.println(d);
         }
     }
+}
