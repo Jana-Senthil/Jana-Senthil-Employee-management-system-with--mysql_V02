@@ -10,14 +10,14 @@ public class LeaveRequest {
     private String reason;
     private LocalDate appliedDate;
     private String status;
-    private int managerId;
+    private Integer managerId;
     private String managerComment;
 
     public LeaveRequest(int leaveId, int employeeId,
                         String leaveType, LocalDate startDate,
                         LocalDate endDate, String reason,
                         LocalDate appliedDate, String status,
-                        int managerId, String managerComment) {
+                        Integer managerId, String managerComment) {
         this.leaveId = leaveId;
         this.employeeId = employeeId;
         this.leaveType = leaveType;
@@ -55,7 +55,7 @@ public class LeaveRequest {
     public String getStatus() {
         return status;
     }
-    public int getManagerId() {
+    public Integer getManagerId() {
         return managerId;
     }
     public String getManagerComment() {

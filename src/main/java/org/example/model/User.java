@@ -3,17 +3,22 @@ package org.example.model;
 public class User {
     private int userId;
     private String username;
-    private String password;
+    private String email;
+    private String phone;
+    private String passwordHash;
     private String role;
     private Integer employeeId;
     private Integer managerId;
 
     public User(int userId, String username,
-                String password, String role,
+                String email, String phone,
+                String passwordHash, String role,
                 Integer employeeId, Integer managerId) {
         this.userId = userId;
         this.username = username;
-        this.password = password;
+        this.email = email;
+        this.phone = phone;
+        this.passwordHash = passwordHash;
         this.role = role;
         this.employeeId = employeeId;
         this.managerId = managerId;
@@ -23,8 +28,14 @@ public class User {
     public void setUsername(String username) {
         this.username = username;
     }
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
     public void setRole(String role) {
         this.role = role;
@@ -44,8 +55,14 @@ public class User {
     public String getUsername() {
         return username;
     }
-    public String getPassword() {
-        return password;
+    public String getEmail() {
+        return email;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public String getPasswordHash() {
+        return passwordHash;
     }
     public String getRole() {
         return role;
