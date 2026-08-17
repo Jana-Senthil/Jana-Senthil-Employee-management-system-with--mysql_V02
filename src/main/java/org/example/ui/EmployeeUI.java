@@ -63,6 +63,7 @@ public class EmployeeUI {
 
                 case 9:
                     System.out.println("View Leave History");
+
                     break;
 
                 case 10:
