@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class AttendanceDAO {
-    public void addAttendance(LocalDate date, int sessionNo, LocalTime checkIn,String mode,int employeeId) {
+    public boolean addAttendance(LocalDate date, int sessionNo, LocalTime checkIn,String mode,int employeeId) {
         String sql = "INSERT INTO attendance(attendance_date,session_no,check_in,mode,employee_id) VALUES(?,?,?,?,?)";
         try(Connection connection = DBConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql)){
@@ -24,17 +24,13 @@ public class AttendanceDAO {
             ps.setString(4, mode);
             ps.setInt(5, employeeId);
             int row = ps.executeUpdate();
-            if (row > 0) {
-                System.out.println("Successfully attendance marked");
-            }else {
-                System.out.println("Failed to mark attendance");
-            }
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return row > 0;
+        }catch (SQLException e) {
+            return false;
         }
     }
 
-    public void updateAttendance(LocalDate date, int sessionNo, LocalTime checkOut,int employeeId) {
+    public boolean updateAttendance(LocalDate date, int sessionNo, LocalTime checkOut,int employeeId) {
         String sql = "update attendance set check_out=?" +
                 " where session_no=? "+
                 " and attendance_date =? " +
@@ -46,13 +42,9 @@ public class AttendanceDAO {
             ps.setDate(3, java.sql.Date.valueOf(date));
             ps.setInt(4, employeeId);
             int row = ps.executeUpdate();
-            if (row > 0) {
-                System.out.println("Successfully attendance marked");
-            }else{
-                System.out.println("Failed to mark attendance");
-            }
+            return row > 0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return false;
         }
     }
 
@@ -78,7 +70,7 @@ public class AttendanceDAO {
                 return new Attendance(employeeId,sessionNo,date,checkIn,checkOut,mode);
            }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return null;
         }
         return null;
     }
@@ -105,12 +97,11 @@ public class AttendanceDAO {
             }
             return attendanceList;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return attendanceList;
         }
-        return attendanceList;
     }
 
-    public List<Attendance> getALLAttendance() {
+    public List<Attendance> getAllAttendance() {
         String sql = "select * from attendance ";
         List<Attendance> attendanceList = new ArrayList<>();
         try(Connection connection = DBConnection.getConnection();

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerDAO {
-    public void addManager(String name,String email,String phone){
+    public boolean addManager(String name,String email,String phone){
         String sql = "INSERT INTO manager_details(manager_name,manager_email,manager_phone) VALUES (?,?,?)";
         try(Connection connection = DBConnection.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql)){
@@ -19,17 +19,13 @@ public class ManagerDAO {
             ps.setString(2,email);
             ps.setString(3,phone);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Manager added successfully");
-            }else{
-                System.out.println("Manager not added successfully");
-            }
+            return row>0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return false;
         }
     }
 
-    public void updateManager(int managerId,String name,String email,String phone){
+    public boolean updateManager(int managerId,String name,String email,String phone){
         String sql = "update manager_details set manager_name=?,manager_email=?,manager_phone=? " +
                 "where manager_id=? ";
         try (Connection connection = DBConnection.getConnection();
@@ -39,29 +35,21 @@ public class ManagerDAO {
             ps.setString(3,phone);
             ps.setInt(4,managerId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Manager updated successfully");
-            }else{
-                System.out.println("Manager not updated successfully");
-            }
+            return row>0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  false;
         }
     }
 
-    public void deleteManager(int managerId){
+    public boolean deleteManager(int managerId){
         String sql = "DELETE FROM manager_details WHERE manager_id=?";
         try(Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setInt(1,managerId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Manager deleted successfully");
-            }else{
-                System.out.println("Manager not deleted successfully");
-            }
+            return row>0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  false;
         }
     }
 
@@ -78,12 +66,11 @@ public class ManagerDAO {
                 String phone = rs.getString("manager_phone");
                 return new Manager(manager_id,name,email,phone);
             }else{
-                System.out.println("Manager not found");
+                return null;
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  null;
         }
-        return null;
     }
 
     public List<Manager> getAllManagers(){
@@ -101,7 +88,7 @@ public class ManagerDAO {
                 managers.add(manager);
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return managers;
         }
         return managers;
     }

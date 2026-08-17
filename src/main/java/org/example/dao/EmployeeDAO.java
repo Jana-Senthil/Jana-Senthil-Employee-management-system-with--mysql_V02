@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAO {
-    public void addEmployee(String employeeName, double employeeSalary,
+
+    public boolean addEmployee(String employeeName, double employeeSalary,
                             String employeeEmail,String phone,
                             String status, String designation,
                             int departmentId) {
@@ -27,21 +28,13 @@ public class EmployeeDAO {
             ps.setString(6,designation);
             ps.setInt(7,departmentId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Employee added successfully");
-            }else {
-                System.out.println("Error adding employee");
-            }
+            return row>0;
         }catch (SQLException e){
-            if (e.getErrorCode() == 1062) {
-                System.out.println("Employee already exists.");
-            } else {
-                System.out.println("Database error: " + e.getMessage());
-            }
+            return  false;
         }
     }
 
-    public void updateEmployee(int employeeId, String employeeName,
+    public boolean updateEmployee(int employeeId, String employeeName,
                                double employeeSalary, String employeeEmail,
                                String phone,String status,
                                String designation, int departmentId){
@@ -59,35 +52,23 @@ public class EmployeeDAO {
         ps.setInt(7,departmentId);
         ps.setInt(8,employeeId);
         int row = ps.executeUpdate();
-        if(row>0){
-            System.out.println("Employee updated successfully");
-        }else  {
-            System.out.println("Error updating employee");
-        }
+        return row>0;
         }catch (SQLException e){
-            if (e.getErrorCode() == 1062) {
-                System.out.println("Employee already exists.");
-            } else {
-                System.out.println("Database error: " + e.getMessage());
-            }
-
+            return  false;
         }
     }
 
-    public void deleteEmployee(int employeeId){
+    public boolean deleteEmployee(int employeeId){
         String sql = "delete from employee_details where employee_id = ?";
         try (Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setInt(1, employeeId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Employee deleted successfully");
-            }else{
-                System.out.println("Error deleting employee");
-            }
+            return row>0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            return false;
         }
+
     }
 
     public Employee getEmployeeById(int employeeId){
@@ -107,12 +88,11 @@ public class EmployeeDAO {
                 int department_id = rs.getInt("department_id");
                 return new Employee(employee_Id,employee_name,employee_salary,employee_email,employee_phone,status,designation,department_id);
             }else{
-                System.out.println("Employee not found");
+                return null;
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  null;
         }
-        return null;
     }
 
     public List<Employee> getAllEmployees(){
@@ -134,7 +114,7 @@ public class EmployeeDAO {
                 employees.add(employee);
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return employees;
         }
         return employees;
     }

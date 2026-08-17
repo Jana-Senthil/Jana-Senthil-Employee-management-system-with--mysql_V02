@@ -10,7 +10,7 @@ import org.example.config.DBConnection;
 import org.example.model.Department;
 
 public class DepartmentDAO {
-    public void addDepartment(String departmentName,String location){
+    public boolean addDepartment(String departmentName,String location){
 //        String sql = "insert into department_details values (?,?)";
         String sql = "INSERT INTO department_details " +
                 "(department_name, location) VALUES (?, ?)";
@@ -19,22 +19,13 @@ public class DepartmentDAO {
             ps.setString(1,departmentName);
             ps.setString(2,location);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Department Added Successfully");
-            }else{
-                System.out.println("Department Added Failed");
-            }
+            return row > 0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
-            if (e.getErrorCode() == 1062) {
-                System.out.println("Department already exists.");
-            } else {
-                System.out.println("Database error: " + e.getMessage());
-            }
+            return   false;
         }
     }
 
-    public void updateDepartment(int departmentId,String departmentName,String location){
+    public boolean updateDepartment(int departmentId,String departmentName,String location){
         String sql = "UPDATE department_details " +
                 "SET department_name = ?, location = ? "+
                 "where department_id = ?";
@@ -44,30 +35,22 @@ public class DepartmentDAO {
             ps.setString(2,location);
             ps.setInt(3,departmentId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Department Updated Successfully");
-            }else {
-                System.out.println("Department Updated Failed");
-            }
+            return row > 0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  false;
         }
     }
 
-    public void deleteDepartment(int departmentId){
+    public boolean deleteDepartment(int departmentId){
         String sql = "delete from department_details " +
                 "where department_id = ?";
         try(Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setInt(1,departmentId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("Department Deleted Successfully");
-            }else  {
-                System.out.println("Department Deleted Failed");
-            }
+            return row > 0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return false;
         }
     }
 
@@ -84,14 +67,12 @@ public class DepartmentDAO {
                 String location = rs.getString("location");
                 return new Department(department_id,department_name,location);
             }else{
-                System.out.println("Department Not Found");
+                return null;
             }
 
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return  null;
         }
-
-        return null;
     }
 
     public List<Department> getAllDepartments(){
@@ -108,7 +89,7 @@ public class DepartmentDAO {
                 departments.add(department);
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return departments;
         }
         return departments;
     }

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class LeaveRequestDAO {
 
-    public void addLeaveReqest(int employeeId, String leaveType,
+    public boolean addLeaveReqest(int employeeId, String leaveType,
                                LocalDate startDate, LocalDate endDate,
                                String leaveReason,LocalDate applyDate) {
         String sql= "insert into leave_request" +
@@ -27,17 +27,13 @@ public class LeaveRequestDAO {
             ps.setString(5,leaveReason);
             ps.setDate(6,java.sql.Date.valueOf(applyDate));
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("leave request has been added successfully");
-            }else{
-                System.out.println("leave request has been added failed");
-            }
+            return row>0;
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return false;
         }
     }
 
-    public void updateLeaveRequestByManager(int leaveId, int manager_id, String manager_comment,String status){
+    public boolean updateLeaveRequestByManager(int leaveId, int manager_id, String manager_comment,String status){
         String sql = "update leave_request set manager_id = ?, manager_comment = ?, status = ? " +
                 "where leave_id = ? ";
         try(Connection connection = DBConnection.getConnection();
@@ -47,17 +43,13 @@ public class LeaveRequestDAO {
             ps.setString(3, status);
             ps.setInt(4, leaveId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("leave request has been updated successfully");
-            }else{
-                System.out.println("leave request has been updated failed");
-            }
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return row>0;
+        }catch (SQLException e) {
+            return false;
         }
     }
 
-    public void updateLeaveRequestByEmployee(int leaveId,int employeeId, String leaveType,
+    public boolean updateLeaveRequestByEmployee(int leaveId,int employeeId, String leaveType,
                                              LocalDate startDate, LocalDate endDate,
                                              String leaveReason,LocalDate applyDate){
         String sql = "update leave_request set leave_type = ?, start_date = ?, end_date = ?, reason = ?, applied_date = ?" +
@@ -72,30 +64,22 @@ public class LeaveRequestDAO {
             ps.setInt(6, leaveId);
             ps.setInt(7, employeeId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("leave request has been updated successfully");
-            }else {
-                System.out.println("leave request has been updated failed");
-            }
+            return row>0;
         }catch(SQLException e){
-            System.out.println(e.getMessage());
+            return false;
         }
     }
 
-    public void deleteLeaveRequestByLeaveId(int leaveId, int employeeId){
+    public boolean deleteLeaveRequestByLeaveId(int leaveId, int employeeId){
         String sql = "delete from leave_request where leave_id = ? and status = 'Pending' and employee_id = ? ";
         try(Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setInt(1, leaveId);
             ps.setInt(2, employeeId);
             int row = ps.executeUpdate();
-            if(row>0){
-                System.out.println("leave request has been deleted successfully");
-            }else  {
-                System.out.println("leave request has been deleted failed");
-            }
-        }catch(SQLException e){
-            System.out.println(e.getMessage());
+            return row>0;
+        }catch(SQLException e) {
+            return false;
         }
     }
 
@@ -118,7 +102,7 @@ public class LeaveRequestDAO {
                 return new LeaveRequest(leaveId, employeeId, leaveType, startDate, endDate, leaveReason, applyDate, status, managerId, manager_comment);
             }
         }catch(SQLException e){
-            System.out.println(e.getMessage());
+            return  null;
         }
         return null;
     }
@@ -144,7 +128,7 @@ public class LeaveRequestDAO {
                 leaveRequests.add(leaveRequest);
             }
         }catch(SQLException e){
-            System.out.println(e.getMessage());
+            return leaveRequests;
         }
         return leaveRequests;
     }
@@ -170,7 +154,7 @@ public class LeaveRequestDAO {
                 leaveRequestLists.add(leaveRequest);
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            return leaveRequestLists;
         }
         return leaveRequestLists;
     }

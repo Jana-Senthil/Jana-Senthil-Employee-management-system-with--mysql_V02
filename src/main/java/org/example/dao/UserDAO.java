@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UserDAO {
 
-    public void addUser(String username,
+    public boolean addUser(String username,
                         String passwordHash,
                         String email,
                         String phone,
@@ -48,17 +48,13 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
 
-            if (row > 0) {
-                System.out.println("User added successfully");
-            } else {
-                System.out.println("Failed to add user");
-            }
+            return row>0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            return  false;
         }
     }
 
-    public void updateUserProfile(int userId,
+    public boolean updateUserProfile(int userId,
                                   String username,
                                   String email,
                                   String phone) {
@@ -77,18 +73,14 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
 
-            if (row > 0) {
-                System.out.println("User profile updated successfully");
-            } else {
-                System.out.println("User not found");
-            }
+            return row>0;
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            return   false;
         }
     }
 
-    public void updatePassword(int userId, String passwordHash) {
+    public boolean updatePassword(int userId, String passwordHash) {
 
         String sql = "UPDATE users " +
                 "SET password_hash = ? " +
@@ -102,18 +94,15 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
 
-            if (row > 0) {
-                System.out.println("Password updated successfully");
-            } else {
-                System.out.println("User not found");
-            }
+            return row>0;
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return false;
     }
 
-    public void updateUserRole(int userId,
+    public boolean updateUserRole(int userId,
                                String role,
                                Integer employeeId,
                                Integer managerId) {
@@ -143,18 +132,15 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
 
-            if (row > 0) {
-                System.out.println("User role updated successfully");
-            } else {
-                System.out.println("User not found");
-            }
+            return row>0;
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return false;
     }
 
-    public void deleteUser(int userId) {
+    public boolean deleteUser(int userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
 
         try (Connection connection = DBConnection.getConnection();
@@ -164,15 +150,12 @@ public class UserDAO {
 
             int row = ps.executeUpdate();
 
-            if (row > 0) {
-                System.out.println("User deleted successfully");
-            } else {
-                System.out.println("User not found");
-            }
+            return row>0;
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return false;
     }
 
     public User getUserById(int userId) {
