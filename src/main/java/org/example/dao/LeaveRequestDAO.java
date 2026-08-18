@@ -94,7 +94,7 @@ public class LeaveRequestDAO {
                 String leaveType = rs.getString("leave_type");
                 LocalDate startDate = rs.getDate("start_date").toLocalDate();
                 LocalDate endDate = rs.getDate("end_date").toLocalDate();
-                String leaveReason = rs.getString("leave_reason");
+                String leaveReason = rs.getString("reason");
                 LocalDate applyDate = rs.getDate("applied_date").toLocalDate();
                 String status = rs.getString("status");
                 Integer managerId = rs.getInt("manager_id");

@@ -81,9 +81,9 @@ public class ManagerDAO {
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 int manager_id = rs.getInt("manager_id");
-                String name = rs.getString("name");
-                String email = rs.getString("email");
-                String phone = rs.getString("phone");
+                String name = rs.getString("manager_name");
+                String email = rs.getString("manager_email");
+                String phone = rs.getString("manager_phone");
                 Manager manager = new Manager(manager_id,name,email,phone);
                 managers.add(manager);
             }

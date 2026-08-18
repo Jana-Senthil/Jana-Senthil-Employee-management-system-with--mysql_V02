@@ -156,7 +156,7 @@ public class AttendanceService {
         return mode != null &&
                 (
                         mode.equalsIgnoreCase("OFFICE") ||
-                                mode.equalsIgnoreCase("REMOTE")
+                                mode.equalsIgnoreCase("WFH")
                 );
     }
 }
