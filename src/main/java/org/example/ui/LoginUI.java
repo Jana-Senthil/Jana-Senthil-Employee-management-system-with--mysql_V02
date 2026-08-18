@@ -8,31 +8,76 @@ import java.util.Scanner;
 
 public class LoginUI {
 
-    private final LoginService loginService = new LoginService();
-    private final Scanner scanner = new Scanner(System.in);
+    private final LoginService loginService =
+            new LoginService();
+
+    private final Scanner scanner =
+            new Scanner(System.in);
+
 
     public void start() {
 
-        System.out.println("===== Employee Management System =====");
-        System.out.println("Login");
+        System.out.println(
+                "\n===== Employee Management System ====="
+        );
 
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
+        System.out.println(
+                "============== LOGIN =============="
+        );
 
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+        System.out.print(
+                "Username: "
+        );
 
-        Session session = loginService.login(username, password);
+        String username =
+                scanner.nextLine();
 
+        System.out.print(
+                "Password: "
+        );
+
+        String password =
+                scanner.nextLine();
+
+
+        // Login
+        Session session =
+                loginService.login(
+                        username,
+                        password
+                );
+
+
+        // Login failed
         if (session == null) {
-            System.out.println("Invalid username or password");
+
+            System.out.println(
+                    "Invalid username or password."
+            );
+
             return;
         }
 
-        SessionManager.startSession(session);
 
-        System.out.println("Login successful");
-        System.out.println("Welcome " + session.getUsername());
+        // Start session
+        SessionManager.startSession(
+                session
+        );
+
+
+        System.out.println(
+                "\nLogin successful."
+        );
+
+        System.out.println(
+                "Welcome "
+                        + session.getUsername()
+        );
+
+
+        // =====================================================
+        // ROLE BASED REDIRECTION
+        // =====================================================
 
         if (SessionManager.isEmployee()) {
 
@@ -45,6 +90,14 @@ public class LoginUI {
         } else if (SessionManager.isAdmin()) {
 
             new AdminUI().showMenu();
+
+        } else {
+
+            System.out.println(
+                    "Invalid user role."
+            );
+
+            SessionManager.logout();
         }
     }
 }

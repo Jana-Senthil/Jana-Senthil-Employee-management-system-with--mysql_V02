@@ -53,7 +53,7 @@ public class LeaveRequestDAO {
                                              LocalDate startDate, LocalDate endDate,
                                              String leaveReason,LocalDate applyDate){
         String sql = "update leave_request set leave_type = ?, start_date = ?, end_date = ?, reason = ?, applied_date = ?" +
-                "where leave_id = ? and employee_id = ? and status = 'Pending'";
+                "where leave_id = ? and employee_id = ? and status = 'PENDING'";
         try(Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setString(1, leaveType);
@@ -71,7 +71,7 @@ public class LeaveRequestDAO {
     }
 
     public boolean deleteLeaveRequestByLeaveId(int leaveId, int employeeId){
-        String sql = "delete from leave_request where leave_id = ? and status = 'Pending' and employee_id = ? ";
+        String sql = "delete from leave_request where leave_id = ? and status = 'PENDING' and employee_id = ? ";
         try(Connection connection = DBConnection.getConnection();
         PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setInt(1, leaveId);

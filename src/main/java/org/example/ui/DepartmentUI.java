@@ -8,8 +8,16 @@ import java.util.Scanner;
 
 public class DepartmentUI {
 
-    private final DepartmentService departmentService = new DepartmentService();
-    private final Scanner scanner = new Scanner(System.in);
+    private final DepartmentService departmentService =
+            new DepartmentService();
+
+    private final Scanner scanner =
+            new Scanner(System.in);
+
+
+    // =========================================================
+    // MAIN MENU
+    // =========================================================
 
     public void showMenu() {
 
@@ -26,6 +34,7 @@ public class DepartmentUI {
             System.out.println("6. Back");
 
             System.out.print("Enter choice: ");
+
             int choice = scanner.nextInt();
             scanner.nextLine();
 
@@ -44,11 +53,11 @@ public class DepartmentUI {
                     break;
 
                 case 4:
-                    getDepartmentById();
+                    searchDepartment();
                     break;
 
                 case 5:
-                    getAllDepartments();
+                    viewAllDepartments();
                     break;
 
                 case 6:
@@ -56,18 +65,37 @@ public class DepartmentUI {
                     break;
 
                 default:
-                    System.out.println("Invalid choice");
+                    System.out.println(
+                            "Invalid choice."
+                    );
             }
         }
     }
 
+
+    // =========================================================
+    // 1. ADD DEPARTMENT
+    // =========================================================
+
     private void addDepartment() {
 
-        System.out.print("Enter department name: ");
-        String departmentName = scanner.nextLine();
+        System.out.println(
+                "\n===== Add Department ====="
+        );
 
-        System.out.print("Enter location: ");
-        String location = scanner.nextLine();
+        System.out.print(
+                "Enter department name: "
+        );
+
+        String departmentName =
+                scanner.nextLine();
+
+        System.out.print(
+                "Enter location: "
+        );
+
+        String location =
+                scanner.nextLine();
 
         boolean result =
                 departmentService.addDepartment(
@@ -76,23 +104,72 @@ public class DepartmentUI {
                 );
 
         if (result) {
-            System.out.println("Department added successfully.");
+
+            System.out.println(
+                    "Department added successfully."
+            );
+
         } else {
-            System.out.println("Failed to add department.");
+
+            System.out.println(
+                    "Failed to add department."
+            );
         }
     }
 
+
+    // =========================================================
+    // 2. UPDATE DEPARTMENT
+    // =========================================================
+
     private void updateDepartment() {
 
-        System.out.print("Enter department ID: ");
-        int departmentId = scanner.nextInt();
+        System.out.println(
+                "\n===== Update Department ====="
+        );
+
+        System.out.print(
+                "Enter department ID: "
+        );
+
+        int departmentId =
+                scanner.nextInt();
+
         scanner.nextLine();
 
-        System.out.print("Enter new department name: ");
-        String departmentName = scanner.nextLine();
+        Department department =
+                departmentService.getDepartmentById(
+                        departmentId
+                );
 
-        System.out.print("Enter new location: ");
-        String location = scanner.nextLine();
+        if (department == null) {
+
+            System.out.println(
+                    "Department not found."
+            );
+
+            return;
+        }
+
+        System.out.println(
+                "\nCurrent Department Details:"
+        );
+
+        displayDepartment(department);
+
+        System.out.print(
+                "\nEnter new department name: "
+        );
+
+        String departmentName =
+                scanner.nextLine();
+
+        System.out.print(
+                "Enter new location: "
+        );
+
+        String location =
+                scanner.nextLine();
 
         boolean result =
                 departmentService.updateDepartment(
@@ -102,78 +179,184 @@ public class DepartmentUI {
                 );
 
         if (result) {
-            System.out.println("Department updated successfully.");
+
+            System.out.println(
+                    "Department updated successfully."
+            );
+
         } else {
-            System.out.println("Failed to update department.");
+
+            System.out.println(
+                    "Failed to update department."
+            );
         }
     }
 
+
+    // =========================================================
+    // 3. DELETE DEPARTMENT
+    // =========================================================
+
     private void deleteDepartment() {
 
-        System.out.print("Enter department ID: ");
-        int departmentId = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.print(
-                "Are you sure you want to delete this department? (yes/no): "
+        System.out.println(
+                "\n===== Delete Department ====="
         );
 
-        String confirmation = scanner.nextLine();
+        System.out.print(
+                "Enter department ID: "
+        );
+
+        int departmentId =
+                scanner.nextInt();
+
+        scanner.nextLine();
+
+        Department department =
+                departmentService.getDepartmentById(
+                        departmentId
+                );
+
+        if (department == null) {
+
+            System.out.println(
+                    "Department not found."
+            );
+
+            return;
+        }
+
+        displayDepartment(department);
+
+        System.out.print(
+                "\nAre you sure you want to "
+                        + "delete this department? (yes/no): "
+        );
+
+        String confirmation =
+                scanner.nextLine();
 
         if (!confirmation.equalsIgnoreCase("yes")) {
-            System.out.println("Delete operation cancelled.");
+
+            System.out.println(
+                    "Delete operation cancelled."
+            );
+
             return;
         }
 
         boolean result =
-                departmentService.deleteDepartment(departmentId);
+                departmentService.deleteDepartment(
+                        departmentId
+                );
 
         if (result) {
-            System.out.println("Department deleted successfully.");
+
+            System.out.println(
+                    "Department deleted successfully."
+            );
+
         } else {
-            System.out.println("Failed to delete department.");
+
+            System.out.println(
+                    "Failed to delete department."
+            );
         }
     }
 
-    private void getDepartmentById() {
 
-        System.out.print("Enter department ID: ");
-        int departmentId = scanner.nextInt();
+    // =========================================================
+    // 4. SEARCH DEPARTMENT
+    // =========================================================
+
+    private void searchDepartment() {
+
+        System.out.println(
+                "\n===== Search Department ====="
+        );
+
+        System.out.print(
+                "Enter department ID: "
+        );
+
+        int departmentId =
+                scanner.nextInt();
+
         scanner.nextLine();
 
         Department department =
-                departmentService.getDepartmentById(departmentId);
+                departmentService.getDepartmentById(
+                        departmentId
+                );
 
         if (department == null) {
-            System.out.println("Department not found.");
+
+            System.out.println(
+                    "Department not found."
+            );
+
             return;
         }
 
-        System.out.println("\n===== Department Details =====");
-        System.out.println("Department ID   : " + department.getDepartmentId());
-        System.out.println("Department Name : " + department.getDepartmentName());
-        System.out.println("Location        : " + department.getLocation());
+        displayDepartment(department);
     }
 
-    private void getAllDepartments() {
+
+    // =========================================================
+    // 5. VIEW ALL DEPARTMENTS
+    // =========================================================
+
+    private void viewAllDepartments() {
+
+        System.out.println(
+                "\n===== All Departments ====="
+        );
 
         List<Department> departments =
                 departmentService.getAllDepartments();
 
-        if (departments == null || departments.isEmpty()) {
-            System.out.println("No departments found.");
+        if (departments == null ||
+                departments.isEmpty()) {
+
+            System.out.println(
+                    "No departments found."
+            );
+
             return;
         }
 
-        System.out.println("\n===== All Departments =====");
+        for (Department department :
+                departments) {
 
-        for (Department department : departments) {
+            displayDepartment(department);
 
             System.out.println(
-                    "ID: " + department.getDepartmentId() +
-                            " | Name: " + department.getDepartmentName() +
-                            " | Location: " + department.getLocation()
+                    "--------------------------------"
             );
         }
+    }
+
+
+    // =========================================================
+    // DISPLAY DEPARTMENT
+    // =========================================================
+
+    private void displayDepartment(
+            Department department) {
+
+        System.out.println(
+                "Department ID   : "
+                        + department.getDepartmentId()
+        );
+
+        System.out.println(
+                "Department Name : "
+                        + department.getDepartmentName()
+        );
+
+        System.out.println(
+                "Location        : "
+                        + department.getLocation()
+        );
     }
 }

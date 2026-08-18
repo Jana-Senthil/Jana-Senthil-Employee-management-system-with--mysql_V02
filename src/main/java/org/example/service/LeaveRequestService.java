@@ -203,14 +203,13 @@ public class LeaveRequestService {
     public List<LeaveRequest> getAllLeaveRequest() {
         return leaveRequestDAO.getAllLeaveRequest();
     }
-
+    
 
     private boolean isValidLeaveStatus(String status) {
 
         return status != null &&
-                (
+                (status.equalsIgnoreCase("PENDING") ||
                         status.equalsIgnoreCase("APPROVED") ||
-                                status.equalsIgnoreCase("REJECTED")
-                );
+                        status.equalsIgnoreCase("REJECTED"));
     }
 }

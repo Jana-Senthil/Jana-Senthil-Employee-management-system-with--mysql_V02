@@ -63,12 +63,12 @@ create table attendance (
 CREATE TABLE leave_request (
                                leave_id INT AUTO_INCREMENT,
                                employee_id INT NOT NULL,
-                               leave_type ENUM('Casual','Sick','Earned','Emergency') NOT NULL,
+                               leave_type ENUM('CASUAL','SICK','EARNED','EMERGENCY') NOT NULL,
                                start_date DATE NOT NULL,
                                end_date DATE NOT NULL,
                                reason VARCHAR(255) NOT NULL,
                                applied_date DATE NOT NULL,
-                               status ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
+                               status ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING',
                                manager_id int,
                                manager_comment VARCHAR(255),
 
@@ -91,9 +91,13 @@ CREATE TABLE users (
 
                        username VARCHAR(50) NOT NULL UNIQUE,
 
-                       password VARCHAR(255) NOT NULL,
+                       password_hash VARCHAR(255) NOT NULL,
 
-                       role ENUM('EMPLOYEE','MANAGER') NOT NULL,
+                       role ENUM('EMPLOYEE','MANAGER','ADMIN') NOT NULL,
+
+                       email VARCHAR(100) NOT NULL UNIQUE,
+
+                       phone VARCHAR(15) NOT NULL UNIQUE,
 
                        employee_id INT,
 
