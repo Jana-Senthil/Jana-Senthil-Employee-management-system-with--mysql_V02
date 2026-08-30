@@ -3,26 +3,35 @@ package org.example.dao;
 import org.example.config.DBConnection;
 import org.example.model.Manager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerDAO {
-    public boolean addManager(String name,String email,String phone){
+    public int addManager(String name,String email,String phone){
         String sql = "INSERT INTO manager_details(manager_name,manager_email,manager_phone) VALUES (?,?,?)";
         try(Connection connection = DBConnection.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
+            PreparedStatement ps = connection.prepareStatement(
+                    sql,
+                    Statement.RETURN_GENERATED_KEYS
+            )){
             ps.setString(1,name);
             ps.setString(2,email);
             ps.setString(3,phone);
             int row = ps.executeUpdate();
-            return row>0;
+            if (row > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
         }catch (SQLException e){
-            return false;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
         }
+        return 0;
     }
 
     public boolean updateManager(int managerId,String name,String email,String phone){
@@ -37,19 +46,89 @@ public class ManagerDAO {
             int row = ps.executeUpdate();
             return row>0;
         }catch (SQLException e){
-            return  false;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
 
-    public boolean deleteManager(int managerId){
-        String sql = "DELETE FROM manager_details WHERE manager_id=?";
-        try(Connection connection = DBConnection.getConnection();
-        PreparedStatement ps = connection.prepareStatement(sql)){
-            ps.setInt(1,managerId);
-            int row = ps.executeUpdate();
-            return row>0;
-        }catch (SQLException e){
-            return  false;
+    public boolean permanentlyDeleteManager(int managerId, int userId) {
+
+        String deleteUser =
+                "DELETE FROM users WHERE user_id = ? AND manager_id = ?";
+
+        String deleteManager =
+                "DELETE FROM manager_details WHERE manager_id = ?";
+
+        Connection connection = null;
+
+        try {
+            connection = DBConnection.getConnection();
+
+            // Start transaction
+            connection.setAutoCommit(false);
+
+            // 1. Delete manager's user account
+            try (PreparedStatement ps =
+                         connection.prepareStatement(deleteUser)) {
+
+                ps.setInt(1, userId);
+                ps.setInt(2, managerId);
+
+                int userRows = ps.executeUpdate();
+
+                if (userRows == 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            // 2. Delete manager details
+            try (PreparedStatement ps =
+                         connection.prepareStatement(deleteManager)) {
+
+                ps.setInt(1, managerId);
+
+                int managerRows = ps.executeUpdate();
+
+                if (managerRows == 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            // Both operations succeeded
+            connection.commit();
+
+            return true;
+
+        } catch (SQLException e) {
+
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackException) {
+                    rollbackException.printStackTrace();
+                }
+            }
+
+            System.out.println(
+                    "Permanent manager deletion failed: "
+                            + e.getMessage()
+            );
+
+            return false;
+
+        } finally {
+
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -69,7 +148,9 @@ public class ManagerDAO {
                 return null;
             }
         }catch (SQLException e){
-            return  null;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -88,8 +169,12 @@ public class ManagerDAO {
                 managers.add(manager);
             }
         }catch (SQLException e){
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
             return managers;
         }
         return managers;
     }
+
 }
+

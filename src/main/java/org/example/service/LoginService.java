@@ -12,26 +12,40 @@ public class LoginService {
 
     public Session login(String username, String password) {
 
+        // Validate username
         if (!ValidationUtil.isValidName(username)) {
             return null;
         }
 
+        // Validate password
         if (password == null || password.isBlank()) {
             return null;
         }
 
-        User user = userDAO.getUserByUsername(username);
+        // Find user
+        User user =
+                userDAO.getUserByUsername(username);
 
         if (user == null) {
             return null;
         }
 
-        if (!PasswordUtil.verifyPassword(
-                password,
-                user.getPasswordHash())) {
+        // Check account status
+        if (!"ACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
             return null;
         }
 
+        // Verify password
+        if (!PasswordUtil.verifyPassword(
+                password,
+                user.getPasswordHash())) {
+
+            return null;
+        }
+
+        // Create session
         return new Session(user);
     }
 }

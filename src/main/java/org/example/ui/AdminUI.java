@@ -129,10 +129,12 @@ public class AdminUI {
 
             System.out.println("1. Add Employee");
             System.out.println("2. Update Employee");
-            System.out.println("3. Delete Employee");
-            System.out.println("4. Search Employee");
-            System.out.println("5. View All Employees");
-            System.out.println("6. Back");
+            System.out.println("3. Deactivate Employee");
+            System.out.println("4. Activate Employee");
+            System.out.println("5. Permanently Delete Employee");
+            System.out.println("6. Search Employee");
+            System.out.println("7. View All Employees");
+            System.out.println("8. Back");
 
             System.out.print("Enter choice: ");
 
@@ -152,18 +154,26 @@ public class AdminUI {
                     break;
 
                 case 3:
-                    deleteEmployee();
+                    deactivateEmployee();
                     break;
 
                 case 4:
-                    searchEmployee();
+                    activeEmployee();
                     break;
 
                 case 5:
-                    viewAllEmployees();
+                    permanentlyDeleteEmployee();
                     break;
 
                 case 6:
+                    searchEmployee();
+                    break;
+
+                case 7:
+                    viewAllEmployees();
+                    break;
+
+                case 8:
                     running = false;
                     break;
 
@@ -237,7 +247,7 @@ public class AdminUI {
 
         scanner.nextLine();
 
-        boolean result =
+        int result =
                 employeeService.addEmployee(
                         name,
                         salary,
@@ -248,11 +258,18 @@ public class AdminUI {
                         departmentId
                 );
 
-        if (result) {
+        if (result > 0) {
 
             System.out.println(
                     "Employee added successfully."
             );
+            System.out.println(
+                    "Employee ID: "+result
+            );
+            System.out.println(
+                    "Create a User ID for this Employee ID : " + result
+            );
+            addUser();
 
         } else {
 
@@ -374,10 +391,10 @@ public class AdminUI {
     }
 
 
-    private void deleteEmployee() {
+    private void deactivateEmployee() {
 
         System.out.println(
-                "\n===== Delete Employee ====="
+                "\n===== Deactivate Employee ====="
         );
 
         System.out.print(
@@ -415,31 +432,204 @@ public class AdminUI {
         if (!confirmation.equalsIgnoreCase("yes")) {
 
             System.out.println(
-                    "Delete operation cancelled."
+                    "Deactivate operation cancelled."
             );
 
             return;
         }
 
         boolean result =
-                employeeService.deleteEmployee(
+                employeeService.deactivateEmployee(
                         employeeId
                 );
 
         if (result) {
 
             System.out.println(
-                    "Employee deleted successfully."
+                    "Employee deactivate successfully."
             );
 
         } else {
 
             System.out.println(
-                    "Failed to delete employee."
+                    "Failed to deactivate employee."
             );
         }
     }
 
+
+    private void activeEmployee() {
+
+        System.out.println(
+                "\n===== Activate Employee ====="
+        );
+
+        System.out.print(
+                "Enter employee ID: "
+        );
+
+        int employeeId =
+                scanner.nextInt();
+
+        scanner.nextLine();
+
+        Employee employee =
+                employeeService.getEmployeeById(
+                        employeeId
+                );
+
+        if (employee == null) {
+
+            System.out.println(
+                    "Employee not found."
+            );
+
+            return;
+        }
+
+        displayEmployee(employee);
+
+        if (employee.getStatus()
+                .equalsIgnoreCase("ACTIVE")) {
+
+            System.out.println(
+                    "Employee is already active."
+            );
+
+            return;
+        }
+
+        System.out.print(
+                "\nAre you sure you want to "
+                        + "activate this employee? (yes/no): "
+        );
+
+        String confirmation =
+                scanner.nextLine();
+
+        if (!confirmation.equalsIgnoreCase("yes")) {
+
+            System.out.println(
+                    "Activation cancelled."
+            );
+
+            return;
+        }
+
+        boolean result =
+                employeeService.activateEmployee(
+                        employeeId
+                );
+
+        if (result) {
+
+            System.out.println(
+                    "Employee activated successfully."
+            );
+
+        } else {
+
+            System.out.println(
+                    "Failed to activate employee."
+            );
+        }
+    }
+    private void permanentlyDeleteEmployee() {
+
+        System.out.println("\n===== Permanently Delete Employee =====");
+
+        System.out.print("Enter Employee ID: ");
+        int employeeId = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.print("Enter Employee User ID: ");
+        int userId = scanner.nextInt();
+        scanner.nextLine();
+
+        Employee employee =
+                employeeService.getEmployeeById(employeeId);
+
+        User user =
+                userService.getUserById(userId);
+
+        // Check employee
+        if (employee == null) {
+            System.out.println("Employee not found.");
+            return;
+        }
+
+        // Check user
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Check whether this user belongs to this employee
+        if (user.getEmployeeId() == null ||
+                user.getEmployeeId() != employeeId) {
+
+            System.out.println(
+                    "This user does not belong to the entered employee."
+            );
+            return;
+        }
+
+        // Check employee status
+        if (!employee.getStatus()
+                .equalsIgnoreCase("INACTIVE")) {
+
+            System.out.println(
+                    "Employee must be INACTIVE before permanent deletion."
+            );
+            return;
+        }
+
+        // Check user account status
+        if (!user.getAccountStatus()
+                .equalsIgnoreCase("INACTIVE")) {
+
+            System.out.println(
+                    "User account must be INACTIVE before permanent deletion."
+            );
+            return;
+        }
+
+        // Display details
+        System.out.println("\nEmployee Details:");
+        System.out.println(employee);
+
+        System.out.println("\nUser Details:");
+        System.out.println(user);
+
+        // Confirmation
+        System.out.print(
+                "\nAre you sure you want to permanently delete this employee? (yes/no): "
+        );
+
+        String confirmation = scanner.nextLine();
+
+        if (!confirmation.equalsIgnoreCase("yes")) {
+            System.out.println("Delete operation cancelled.");
+            return;
+        }
+
+        // Then delete EMPLOYEE
+        boolean employeeDeleted =
+                employeeService.permanentlyDeleteEmployee(employeeId);
+
+        if (employeeDeleted) {
+
+            System.out.println(
+                    "Employee and user account permanently deleted successfully."
+            );
+
+        } else {
+
+            System.out.println(
+                    "User was deleted, but employee deletion failed."
+            );
+        }
+    }
 
     private void searchEmployee() {
 
@@ -563,6 +753,7 @@ public class AdminUI {
             System.out.println("1. Add Manager");
             System.out.println("2. Update Manager");
             System.out.println("3. Delete Manager");
+            System.out.println("4. Activate Employee");
             System.out.println("4. Search Manager");
             System.out.println("5. View All Managers");
             System.out.println("6. Back");
@@ -585,7 +776,7 @@ public class AdminUI {
                     break;
 
                 case 3:
-                    deleteManager();
+                    permanentlyDeleteManager();
                     break;
 
                 case 4:
@@ -636,18 +827,21 @@ public class AdminUI {
         String phone =
                 scanner.nextLine();
 
-        boolean result =
+        int result =
                 managerService.addManager(
                         name,
                         email,
                         phone
                 );
 
-        if (result) {
+        if (result > 0) {
 
             System.out.println(
                     "Manager added successfully."
             );
+            System.out.println("Manager ID is "+ result);
+            System.out.println("Create a User ID and Password for this manager Id ; " + result);
+            addUser();
 
         } else {
 
@@ -731,43 +925,75 @@ public class AdminUI {
     }
 
 
-    private void deleteManager() {
+    private void permanentlyDeleteManager() {
 
         System.out.println(
-                "\n===== Delete Manager ====="
+                "\n===== Permanently Delete Manager ====="
         );
 
-        System.out.print(
-                "Enter manager ID: "
-        );
+        System.out.print("Enter Manager ID: ");
+        int managerId = scanner.nextInt();
+        scanner.nextLine();
 
-        int managerId =
-                scanner.nextInt();
-
+        System.out.print("Enter Manager User ID: ");
+        int userId = scanner.nextInt();
         scanner.nextLine();
 
         Manager manager =
-                managerService.getManagerById(
-                        managerId
-                );
+                managerService.getManagerById(managerId);
 
         if (manager == null) {
+            System.out.println("Manager not found.");
+            return;
+        }
+
+        User user =
+                userService.getUserById(userId);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Check user belongs to this manager
+        if (user.getManagerId() == null ||
+                user.getManagerId() != managerId) {
 
             System.out.println(
-                    "Manager not found."
+                    "This user does not belong to the selected manager."
             );
 
             return;
         }
 
+        // Check account status
+        if (!"INACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
+            System.out.println(
+                    "Manager user account is ACTIVE."
+            );
+
+            System.out.println(
+                    "Manager account must be INACTIVE "
+                            + "before permanent deletion."
+            );
+
+            return;
+        }
+
+        System.out.println("\nManager Details:");
         displayManager(manager);
 
+        System.out.println("\nUser Details:");
+        System.out.println(user);
+
         System.out.print(
-                "Are you sure? (yes/no): "
+                "\nAre you sure you want to permanently delete "
+                        + "this manager? (yes/no): "
         );
 
-        String confirmation =
-                scanner.nextLine();
+        String confirmation = scanner.nextLine();
 
         if (!confirmation.equalsIgnoreCase("yes")) {
 
@@ -778,21 +1004,22 @@ public class AdminUI {
             return;
         }
 
-        boolean result =
-                managerService.deleteManager(
-                        managerId
+        boolean deleted =
+                managerService.permanentlyDeleteManager(
+                        managerId,
+                        userId
                 );
 
-        if (result) {
+        if (deleted) {
 
             System.out.println(
-                    "Manager deleted successfully."
+                    "Manager and user account permanently deleted successfully."
             );
 
         } else {
 
             System.out.println(
-                    "Failed to delete manager."
+                    "Failed to permanently delete manager."
             );
         }
     }
@@ -901,10 +1128,12 @@ public class AdminUI {
             System.out.println("2. Update User Profile");
             System.out.println("3. Change User Password");
             System.out.println("4. Update User Role");
-            System.out.println("5. Delete User");
-            System.out.println("6. Search User");
-            System.out.println("7. View All Users");
-            System.out.println("8. Back");
+            System.out.println("5. Inactive User");
+            System.out.println("6. Active User");
+            System.out.println("7. Delete User");
+            System.out.println("8. Search User");
+            System.out.println("9. View All Users");
+            System.out.println("10. Back");
 
             System.out.print("Enter choice: ");
 
@@ -932,18 +1161,26 @@ public class AdminUI {
                     break;
 
                 case 5:
-                    deleteUser();
+                    inactiveUser();
                     break;
 
                 case 6:
-                    searchUser();
+                    activeUser();
                     break;
 
                 case 7:
-                    viewAllUsers();
+                    permanentlyDeleteUser();
                     break;
 
                 case 8:
+                    searchUser();
+                    break;
+
+                case 9:
+                    viewAllUsers();
+                    break;
+
+                case 10:
                     running = false;
                     break;
 
@@ -956,7 +1193,7 @@ public class AdminUI {
     }
 
 
-    private void addUser() {
+ private void addUser() {
 
         System.out.println(
                 "\n===== Add User ====="
@@ -1023,7 +1260,7 @@ public class AdminUI {
             scanner.nextLine();
         }
 
-        boolean result =
+        int userId =
                 userService.addUser(
                         username,
                         password,
@@ -1034,11 +1271,12 @@ public class AdminUI {
                         managerId
                 );
 
-        if (result) {
+        if (userId >0) {
 
             System.out.println(
                     "User added successfully."
             );
+            System.out.println("User ID is: " + userId);
 
         } else {
 
@@ -1318,10 +1556,10 @@ public class AdminUI {
     }
 
 
-    private void deleteUser() {
+    private void inactiveUser() {
 
         System.out.println(
-                "\n===== Delete User ====="
+                "\n===== Inactive User ====="
         );
 
         System.out.print(
@@ -1338,10 +1576,10 @@ public class AdminUI {
                         userId
                 );
 
-        if (user == null) {
+        if (!user.getAccountStatus().equalsIgnoreCase("active")) {
 
             System.out.println(
-                    "User not found."
+                    "User ID is already in Inactive."
             );
 
             return;
@@ -1359,27 +1597,151 @@ public class AdminUI {
         if (!confirmation.equalsIgnoreCase("yes")) {
 
             System.out.println(
-                    "Delete operation cancelled."
+                    "Inactive operation cancelled."
             );
 
             return;
         }
 
         boolean result =
-                userService.deleteUser(
+                userService.deactiveUser(
                         userId
                 );
 
         if (result) {
 
             System.out.println(
-                    "User deleted successfully."
+                    "User inactive successfully."
             );
 
         } else {
 
             System.out.println(
-                    "Failed to delete user."
+                    "Failed to inactive user."
+            );
+        }
+    }
+
+    private void activeUser() {
+
+        System.out.println(
+                "\n===== Active User ====="
+        );
+
+        System.out.print(
+                "Enter user ID: "
+        );
+
+        int userId =
+                scanner.nextInt();
+
+        scanner.nextLine();
+
+        User user =
+                userService.getUserById(
+                        userId
+                );
+
+        if (user.getAccountStatus().equalsIgnoreCase("active")) {
+
+            System.out.println(
+                    "User ID is already in active."
+            );
+
+            return;
+        }
+
+        displayUser(user);
+
+        System.out.print(
+                "Are you sure? (yes/no): "
+        );
+
+        String confirmation =
+                scanner.nextLine();
+
+        if (!confirmation.equalsIgnoreCase("yes")) {
+
+            System.out.println(
+                    "Active operation cancelled."
+            );
+
+            return;
+        }
+
+        boolean result =
+                userService.activeUser(
+                        userId
+                );
+
+        if (result) {
+
+            System.out.println(
+                    "User active successfully."
+            );
+
+        } else {
+
+            System.out.println(
+                    "Failed to active user."
+            );
+        }
+    }
+
+    private void permanentlyDeleteUser() {
+
+        System.out.println("\n===== Permanently Delete User =====");
+
+        System.out.print("Enter User ID: ");
+        int userId = scanner.nextInt();
+        scanner.nextLine();
+
+        User user = userService.getUserById(userId);
+
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        System.out.println("\nUser Details:");
+        System.out.println(user);
+
+        // Check account status
+        if (!"INACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
+            System.out.println(
+                    "User account is ACTIVE."
+            );
+
+            System.out.println(
+                    "User must be INACTIVE before permanent deletion."
+            );
+
+            return;
+        }
+
+        System.out.print(
+                "\nAre you sure you want to permanently delete this user? (yes/no): "
+        );
+
+        String confirmation = scanner.nextLine();
+
+        if (!confirmation.equalsIgnoreCase("yes")) {
+            System.out.println("Delete operation cancelled.");
+            return;
+        }
+
+        boolean deleted =
+                userService.permanentlyDeleteUser(userId);
+
+        if (deleted) {
+            System.out.println(
+                    "User account permanently deleted successfully."
+            );
+        } else {
+            System.out.println(
+                    "Failed to permanently delete user."
             );
         }
     }
@@ -1444,8 +1806,7 @@ public class AdminUI {
     }
 
 
-    private void displayUser(
-            User user) {
+    private void displayUser(User user) {
 
         System.out.println(
                 "User ID     : "
@@ -1583,8 +1944,7 @@ public class AdminUI {
     }
 
 
-    private void displayLeaveRequest(
-            LeaveRequest leave) {
+    private void displayLeaveRequest(LeaveRequest leave) {
 
         System.out.println(
                 "Leave ID        : "

@@ -9,13 +9,13 @@ import java.util.List;
 
 public class DepartmentService {
     private final DepartmentDAO departmentDAO = new DepartmentDAO();
-    public boolean addDepartment(String departmentName,String location) {
+    public int addDepartment(String departmentName,String location) {
         if (!ValidationUtil.isValidName(departmentName)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidName(location)) {
-            return false;
+            return 0;
         }
         return  departmentDAO.addDepartment(departmentName,location);
     }

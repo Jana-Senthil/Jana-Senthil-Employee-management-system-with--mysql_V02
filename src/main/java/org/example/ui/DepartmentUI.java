@@ -97,16 +97,19 @@ public class DepartmentUI {
         String location =
                 scanner.nextLine();
 
-        boolean result =
+        int departmentId =
                 departmentService.addDepartment(
                         departmentName,
                         location
                 );
 
-        if (result) {
+        if (departmentId > 0) {
 
             System.out.println(
                     "Department added successfully."
+            );
+            System.out.println(
+                    "Department ID: " + departmentId
             );
 
         } else {

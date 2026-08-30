@@ -1,7 +1,10 @@
 package org.example.service;
 
+import org.example.dao.DepartmentDAO;
+import org.example.dao.EmployeeDAO;
 import org.example.dao.ManagerDAO;
 import org.example.model.Manager;
+import org.example.model.User;
 import org.example.validation.ValidationUtil;
 
 import java.util.List;
@@ -9,21 +12,22 @@ import java.util.List;
 public class ManagerService {
 
     private final ManagerDAO managerDAO = new ManagerDAO();
+    private final UserService userService = new UserService();
 
-    public boolean addManager(String name,
+    public int addManager(String name,
                               String email,
                               String phone) {
 
         if (!ValidationUtil.isValidName(name)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidEmail(email)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidPhone(phone)) {
-            return false;
+            return 0;
         }
 
         return managerDAO.addManager(name, email, phone);
@@ -58,13 +62,50 @@ public class ManagerService {
         );
     }
 
-    public boolean deleteManager(int managerId) {
+    public boolean permanentlyDeleteManager(
+            int managerId,
+            int userId) {
 
         if (!ValidationUtil.isValidId(managerId)) {
             return false;
         }
 
-        return managerDAO.deleteManager(managerId);
+        if (!ValidationUtil.isValidId(userId)) {
+            return false;
+        }
+
+        Manager manager =
+                managerDAO.getManagerById(managerId);
+
+        if (manager == null) {
+            return false;
+        }
+
+        User user =
+                userService.getUserById(userId);
+
+        if (user == null) {
+            return false;
+        }
+
+        // Verify user belongs to manager
+        if (user.getManagerId() == null ||
+                user.getManagerId() != managerId) {
+
+            return false;
+        }
+
+        // Manager account must be inactive
+        if (!"INACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
+            return false;
+        }
+
+        return managerDAO.permanentlyDeleteManager(
+                managerId,
+                userId
+        );
     }
 
     public Manager getManagerById(int managerId) {

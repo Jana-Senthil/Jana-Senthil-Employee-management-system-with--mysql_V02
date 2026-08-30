@@ -223,24 +223,19 @@ public class EmployeeUI {
 
         System.out.println("\n===== Update Profile =====");
 
-        System.out.print(
-                "Enter new username: "
-        );
-        String username =
-                scanner.nextLine();
+        System.out.print("Enter new username: ");
+        String username = scanner.nextLine();
 
-        System.out.print(
-                "Enter new email: "
-        );
-        String email =
-                scanner.nextLine();
+        System.out.print("Enter new email: ");
+        String email = scanner.nextLine();
 
-        System.out.print(
-                "Enter new phone: "
-        );
-        String phone =
-                scanner.nextLine();
+        System.out.print("Enter new phone: ");
+        String phone = scanner.nextLine();
 
+        System.out.print("Enter the name");
+        String name = scanner.nextLine();
+
+        // Update users table
         boolean userUpdated =
                 userService.updateUserProfile(
                         userId,
@@ -251,22 +246,17 @@ public class EmployeeUI {
 
         if (!userUpdated) {
             System.out.println(
-                    "Failed to update profile."
+                    "Failed to update user profile."
             );
             return;
         }
 
-        /*
-         * users table also contains email and phone.
-         * employee_details contains email and phone.
-         *
-         * Therefore, we keep both records synchronized.
-         */
 
+        // Update employee_details table
         boolean employeeUpdated =
                 employeeService.updateEmployee(
                         employee.getEmployeeId(),
-                        employee.getEmployeeName(),
+                        name,
                         employee.getEmployeeSalary(),
                         email,
                         phone,
@@ -275,19 +265,28 @@ public class EmployeeUI {
                         employee.getDepartmentId()
                 );
 
-        if (employeeUpdated) {
-            System.out.println(
-                    "Profile updated successfully."
-            );
-        } else {
+        if (!employeeUpdated) {
+
             System.out.println(
                     "User profile updated, but employee profile "
                             + "could not be updated."
             );
+
+            return;
         }
+
+
+        // Both updates successful
+        System.out.println(
+                "Profile updated successfully."
+        );
+
+        System.out.println(
+                "Please login again to refresh your session."
+        );
+
+        SessionManager.logout();
     }
-
-
     // =========================================================
     // 3. CHANGE PASSWORD
     // =========================================================
@@ -442,6 +441,10 @@ public class EmployeeUI {
 
             System.out.println(
                     "Attendance marked successfully."
+            );
+
+            System.out.println(
+                    "Session No : " + sessionNo
             );
 
             System.out.println(
@@ -648,7 +651,7 @@ public class EmployeeUI {
         LocalDate appliedDate =
                 LocalDate.now();
 
-        boolean result =
+        int leaveRequestId =
                 leaveRequestService.addLeaveRequest(
                         employeeId,
                         leaveType,
@@ -658,10 +661,12 @@ public class EmployeeUI {
                         appliedDate
                 );
 
-        if (result) {
+        if (leaveRequestId > 0) {
+
 
             System.out.println(
-                    "Leave request submitted successfully."
+                    "Leave request submitted successfully.\n" +
+                            "Your Leave Request no is " + leaveRequestId
             );
 
         } else {

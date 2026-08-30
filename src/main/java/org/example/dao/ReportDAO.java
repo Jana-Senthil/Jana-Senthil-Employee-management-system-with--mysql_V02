@@ -13,8 +13,7 @@ public class ReportDAO {
 
     public int getTotalEmployees() {
 
-        String sql =
-                "SELECT COUNT(*) FROM employee_details";
+        String sql = "SELECT COUNT(*) FROM employee_details";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps =

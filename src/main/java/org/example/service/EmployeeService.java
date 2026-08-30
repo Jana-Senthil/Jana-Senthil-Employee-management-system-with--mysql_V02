@@ -3,40 +3,42 @@ package org.example.service;
 import org.example.dao.DepartmentDAO;
 import org.example.dao.EmployeeDAO;
 import org.example.model.Employee;
+import org.example.model.User;
 import org.example.validation.ValidationUtil;
 
 import java.util.List;
 
 public class EmployeeService {
-    private final EmployeeDAO employeeDAO= new EmployeeDAO();
-    private final DepartmentDAO departmentDAO= new DepartmentDAO();
-    public boolean addEmployee(String employeeName, double employeeSalary,
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
+    private final DepartmentDAO departmentDAO = new DepartmentDAO();
+    private final UserService userService = new UserService();
+    public int addEmployee(String employeeName, double employeeSalary,
                                String employeeEmail,String phone,
                                String status, String designation,
                                int departmentId) {
         if(!ValidationUtil.isValidName(employeeName)){
-            return false;
+            return 0;
         }
         if(departmentDAO.getDepartmentById(departmentId)==null){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidSalary(employeeSalary)){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidEmail(employeeEmail)){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidPhone(phone)){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidEmployeeStatus(status)){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidName(designation)){
-            return false;
+            return 0;
         }
         if(!ValidationUtil.isValidId(departmentId)){
-            return false;
+            return 0;
         }
         return employeeDAO.addEmployee(employeeName, employeeSalary, employeeEmail, phone, status, designation, departmentId);
     }
@@ -75,11 +77,68 @@ public class EmployeeService {
         return employeeDAO.updateEmployee(employeeId, employeeName, employeeSalary, employeeEmail, phone, status, designation, departmentId);
     }
 
-    public boolean deleteEmployee(int employeeId){
-        if(!ValidationUtil.isValidId(employeeId)){
+    public boolean deactivateEmployee(int employeeId) {
+
+        if (!ValidationUtil.isValidId(employeeId)) {
             return false;
         }
-        return employeeDAO.deleteEmployee(employeeId);
+
+        if (employeeDAO.getEmployeeById(employeeId) == null) {
+            return false;
+        }
+
+        return employeeDAO.deactivateEmployee(employeeId);
+    }
+    // Activate employee
+    public boolean activateEmployee(int employeeId) {
+
+        if (!ValidationUtil.isValidId(employeeId)) {
+            return false;
+        }
+
+        if (employeeDAO.getEmployeeById(employeeId) == null) {
+            return false;
+        }
+
+        return employeeDAO.activateEmployee(employeeId);
+    }
+
+    public boolean permanentlyDeleteEmployee(int employeeId) {
+
+        if (!ValidationUtil.isValidId(employeeId)) {
+            return false;
+        }
+
+        Employee employee =
+                employeeDAO.getEmployeeById(employeeId);
+
+        if (employee == null) {
+            return false;
+        }
+
+        // Employee must be INACTIVE
+        if (!"INACTIVE".equalsIgnoreCase(
+                employee.getStatus())) {
+
+            return false;
+        }
+
+        // Find the employee's user account
+        User user =
+                userService.getUserByEmployeeId(employeeId);
+
+        if (user == null) {
+            return false;
+        }
+
+        // User account must also be INACTIVE
+        if (!"INACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
+            return false;
+        }
+
+        return employeeDAO.permanentlyDeleteEmployee(employeeId);
     }
 
     public Employee getEmployeeById(int employeeId){

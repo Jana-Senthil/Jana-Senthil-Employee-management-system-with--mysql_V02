@@ -1,8 +1,5 @@
 package org.example.dao;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,19 +7,26 @@ import org.example.config.DBConnection;
 import org.example.model.Department;
 
 public class DepartmentDAO {
-    public boolean addDepartment(String departmentName,String location){
-//        String sql = "insert into department_details values (?,?)";
+    public int addDepartment(String departmentName,String location){
         String sql = "INSERT INTO department_details " +
                 "(department_name, location) VALUES (?, ?)";
         try(Connection connection = DBConnection.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             ps.setString(1,departmentName);
             ps.setString(2,location);
             int row = ps.executeUpdate();
-            return row > 0;
+            if(row>0){
+                ResultSet rs = ps.getGeneratedKeys();
+
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
         }catch (SQLException e){
-            return   false;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return 0;
     }
 
     public boolean updateDepartment(int departmentId,String departmentName,String location){
@@ -37,8 +41,10 @@ public class DepartmentDAO {
             int row = ps.executeUpdate();
             return row > 0;
         }catch (SQLException e){
-            return  false;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return false;
     }
 
     public boolean deleteDepartment(int departmentId){
@@ -50,8 +56,10 @@ public class DepartmentDAO {
             int row = ps.executeUpdate();
             return row > 0;
         }catch (SQLException e){
-            return false;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return false;
     }
 
     public Department getDepartmentById(int departmentId){
@@ -71,8 +79,10 @@ public class DepartmentDAO {
             }
 
         }catch (SQLException e){
-            return  null;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return  null;
     }
 
     public List<Department> getAllDepartments(){
@@ -89,7 +99,8 @@ public class DepartmentDAO {
                 departments.add(department);
             }
         }catch (SQLException e){
-            return departments;
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
         return departments;
     }

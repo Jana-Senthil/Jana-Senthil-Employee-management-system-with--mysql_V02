@@ -24,6 +24,7 @@ public class Employee {
         this.departmentId = departmentID;
     }
 
+
     //get the values
     public int getEmployeeId() {
         return employeeId;

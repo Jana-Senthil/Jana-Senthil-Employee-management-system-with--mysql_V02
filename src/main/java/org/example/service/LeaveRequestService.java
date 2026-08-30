@@ -16,7 +16,7 @@ public class LeaveRequestService {
     private final ManagerDAO managerDAO = new ManagerDAO();
 
     // Employee applies for leave
-    public boolean addLeaveRequest(int employeeId,
+    public int addLeaveRequest(int employeeId,
                                    String leaveType,
                                    LocalDate startDate,
                                    LocalDate endDate,
@@ -24,31 +24,31 @@ public class LeaveRequestService {
                                    LocalDate applyDate) {
 
         if (!ValidationUtil.isValidId(employeeId)) {
-            return false;
+            return 0;
         }
 
         if (employeeDAO.getEmployeeById(employeeId) == null) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidName(leaveType)) {
-            return false;
+            return 0;
         }
 
         if (startDate == null || endDate == null || applyDate == null) {
-            return false;
+            return 0;
         }
 
         if (startDate.isAfter(endDate)) {
-            return false;
+            return 0;
         }
 
         if (applyDate.isAfter(startDate)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidName(leaveReason)) {
-            return false;
+            return 0;
         }
 
         return leaveRequestDAO.addLeaveReqest(

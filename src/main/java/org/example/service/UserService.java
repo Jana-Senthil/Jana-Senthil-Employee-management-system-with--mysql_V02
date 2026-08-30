@@ -16,7 +16,7 @@ public class UserService {
     private final ManagerDAO managerDAO = new ManagerDAO();
 
     // Add User
-    public boolean addUser(String username,
+    public int addUser(String username,
                            String password,
                            String email,
                            String phone,
@@ -25,23 +25,23 @@ public class UserService {
                            Integer managerId) {
 
         if (!ValidationUtil.isValidName(username)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidPassword(password)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidEmail(email)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidPhone(phone)) {
-            return false;
+            return 0;
         }
 
         if (!ValidationUtil.isValidRole(role)) {
-            return false;
+            return 0;
         }
 
         // Employee user
@@ -49,16 +49,16 @@ public class UserService {
 
             if (employeeId == null ||
                     !ValidationUtil.isValidId(employeeId)) {
-                return false;
+                return 0;
             }
 
             if (employeeDAO.getEmployeeById(employeeId) == null) {
-                return false;
+                return 0;
             }
 
             // Employee cannot have manager_id
             if (managerId != null) {
-                return false;
+                return 0;
             }
         }
 
@@ -67,16 +67,16 @@ public class UserService {
 
             if (managerId == null ||
                     !ValidationUtil.isValidId(managerId)) {
-                return false;
+                return 0;
             }
 
             if (managerDAO.getManagerById(managerId) == null) {
-                return false;
+                return 0;
             }
 
             // Manager cannot have employee_id
             if (employeeId != null) {
-                return false;
+                return 0;
             }
         }
 
@@ -85,7 +85,7 @@ public class UserService {
 
             // Admin is not linked to employee or manager
             if (employeeId != null || managerId != null) {
-                return false;
+                return 0;
             }
         }
 
@@ -235,8 +235,30 @@ public class UserService {
 
 
     // Delete User
-    public boolean deleteUser(int userId) {
+    public boolean permanentlyDeleteUser(int userId) {
 
+        if (!ValidationUtil.isValidId(userId)) {
+            return false;
+        }
+
+        User user = userDAO.getUserById(userId);
+
+        if (user == null) {
+            return false;
+        }
+
+        // User must be INACTIVE before permanent deletion
+        if (!"INACTIVE".equalsIgnoreCase(
+                user.getAccountStatus())) {
+
+            return false;
+        }
+
+        return userDAO.permanentlyDeleteUser(userId);
+    }
+
+    //INACTIVE USERS
+    public boolean deactiveUser(int userId){
         if (!ValidationUtil.isValidId(userId)) {
             return false;
         }
@@ -245,8 +267,22 @@ public class UserService {
             return false;
         }
 
-        return userDAO.deleteUser(userId);
+        return userDAO.inactiveUser(userId);
     }
+
+    //ACTITVE USER
+    public boolean activeUser(int userId){
+        if (!ValidationUtil.isValidId(userId)) {
+            return false;
+        }
+
+        if (userDAO.getUserById(userId) == null) {
+            return false;
+        }
+
+        return userDAO.activeUser(userId);
+    }
+
 
 
     // Get User by ID
@@ -259,20 +295,40 @@ public class UserService {
         return userDAO.getUserById(userId);
     }
 
+    public User getUserByEmployeeId(int employeeId) {
 
-    // Get User by Username
-    public User getUserByUsername(String username) {
-
-        if (!ValidationUtil.isValidName(username)) {
+        if (!ValidationUtil.isValidId(employeeId)) {
             return null;
         }
 
-        return userDAO.getUserByUsername(username);
+        return userDAO.getUserByEmployeeId(employeeId);
     }
-
 
     // Get All Users
     public List<User> getAllUsers() {
         return userDAO.getAllUsers();
     }
+
+
+    // Deactivate user account by employee ID
+    public boolean deactivateUserByEmployeeId(int employeeId) {
+
+        if (!ValidationUtil.isValidId(employeeId)) {
+            return false;
+        }
+
+        return userDAO.deactivateUserByEmployeeId(employeeId);
+    }
+
+
+    // Activate user account by employee ID
+    public boolean activateUserByEmployeeId(int employeeId) {
+
+        if (!ValidationUtil.isValidId(employeeId)) {
+            return false;
+        }
+
+        return userDAO.activateUserByEmployeeId(employeeId);
+    }
+
 }

@@ -21,8 +21,13 @@ public class ManagerUI {
 
     private final Scanner scanner = new Scanner(System.in);
 
+    private final AdminUI adminUI = new AdminUI();
+
     private final ManagerService managerService =
             new ManagerService();
+
+    private final DepartmentUI departmentUI =
+            new DepartmentUI();
 
     private final EmployeeService employeeService =
             new EmployeeService();
@@ -55,12 +60,13 @@ public class ManagerUI {
             System.out.println("3. Change Password");
             System.out.println("4. View Employees");
             System.out.println("5. Manage Employees");
-            System.out.println("6. View Attendance");
-            System.out.println("7. View Leave Requests");
-            System.out.println("8. Approve Leave");
-            System.out.println("9. Reject Leave");
-            System.out.println("10. Reports");
-            System.out.println("11. Logout");
+            System.out.println("6. Manage Departments");
+            System.out.println("7. View Attendance");
+            System.out.println("8. View Leave Requests");
+            System.out.println("9. Approve Leave");
+            System.out.println("10. Reject Leave");
+            System.out.println("11. Reports");
+            System.out.println("12. Logout");
 
             System.out.print("Enter choice: ");
 
@@ -90,26 +96,30 @@ public class ManagerUI {
                     break;
 
                 case 6:
-                    viewAttendance();
+                    departmentUI.showMenu();
                     break;
 
                 case 7:
-                    viewLeaveRequests();
+                    viewAttendance();
                     break;
 
                 case 8:
-                    approveLeave();
+                    viewLeaveRequests();
                     break;
 
                 case 9:
-                    rejectLeave();
+                    approveLeave();
                     break;
 
                 case 10:
-                    showReports();
+                    rejectLeave();
                     break;
 
                 case 11:
+                    showReports();
+                    break;
+
+                case 12:
                     SessionManager.logout();
                     System.out.println(
                             "Logged out successfully."
@@ -218,9 +228,7 @@ public class ManagerUI {
                 SessionManager.getCurrentSession();
 
         if (session == null) {
-            System.out.println(
-                    "Session not found."
-            );
+            System.out.println("Session not found.");
             return;
         }
 
@@ -235,9 +243,7 @@ public class ManagerUI {
         }
 
         Manager manager =
-                managerService.getManagerById(
-                        managerId
-                );
+                managerService.getManagerById(managerId);
 
         if (manager == null) {
             System.out.println(
@@ -246,27 +252,19 @@ public class ManagerUI {
             return;
         }
 
-        System.out.print(
-                "Enter new name: "
-        );
+        System.out.print("Enter new name: ");
+        String name = scanner.nextLine();
 
-        String name =
-                scanner.nextLine();
+        System.out.print("Enter new email: ");
+        String email = scanner.nextLine();
 
-        System.out.print(
-                "Enter new email: "
-        );
+        System.out.print("Enter new phone: ");
+        String phone = scanner.nextLine();
 
-        String email =
-                scanner.nextLine();
 
-        System.out.print(
-                "Enter new phone: "
-        );
-
-        String phone =
-                scanner.nextLine();
-
+        // =====================================================
+        // UPDATE MANAGER DETAILS
+        // =====================================================
 
         boolean managerUpdated =
                 managerService.updateManager(
@@ -277,17 +275,18 @@ public class ManagerUI {
                 );
 
         if (!managerUpdated) {
+
             System.out.println(
                     "Failed to update manager profile."
             );
+
             return;
         }
 
 
-        /*
-         * The users table also stores email and phone.
-         * Keep the manager's user account synchronized.
-         */
+        // =====================================================
+        // UPDATE USER DETAILS
+        // =====================================================
 
         boolean userUpdated =
                 userService.updateUserProfile(
@@ -297,19 +296,30 @@ public class ManagerUI {
                         phone
                 );
 
-        if (userUpdated) {
-
-            System.out.println(
-                    "Profile updated successfully."
-            );
-
-        } else {
+        if (!userUpdated) {
 
             System.out.println(
                     "Manager profile updated, but "
                             + "user account could not be updated."
             );
+
+            return;
         }
+
+
+        // =====================================================
+        // BOTH UPDATES SUCCESSFUL
+        // =====================================================
+
+        System.out.println(
+                "Profile updated successfully."
+        );
+
+        System.out.println(
+                "Please login again to refresh your session."
+        );
+
+        SessionManager.logout();
     }
 
 
@@ -434,19 +444,23 @@ public class ManagerUI {
             );
 
             System.out.println(
-                    "3. Delete Employee"
+                    "3. Deactivate Employee"
             );
 
             System.out.println(
-                    "4. Search Employee"
+                    "4. Activate Employee"
             );
 
             System.out.println(
-                    "5. View All Employees"
+                    "5. Search Employee"
             );
 
             System.out.println(
-                    "6. Back"
+                    "6. View All Employees"
+            );
+
+            System.out.println(
+                    "7. Back"
             );
 
             System.out.print(
@@ -469,18 +483,22 @@ public class ManagerUI {
                     break;
 
                 case 3:
-                    deleteEmployee();
+                    deactivateEmployee();
                     break;
 
                 case 4:
-                    searchEmployee();
+                    activateEmployee();
                     break;
 
                 case 5:
-                    viewEmployees();
+                    searchEmployee();
                     break;
 
                 case 6:
+                    viewEmployees();
+                    break;
+
+                case 7:
                     running = false;
                     break;
 
@@ -558,7 +576,7 @@ public class ManagerUI {
         scanner.nextLine();
 
 
-        boolean result =
+        int employeeId =
                 employeeService.addEmployee(
                         name,
                         salary,
@@ -569,12 +587,54 @@ public class ManagerUI {
                         departmentId
                 );
 
-        if (result) {
+        if (employeeId > 0) {
 
             System.out.println(
                     "Employee added successfully."
             );
+            System.out.println(
+                    "Employee ID is "+ employeeId
+            );
+            System.out.print(
+                    "\nDo you want to create a user account for this employee? (yes/no): "
+            );
 
+            String choice = scanner.nextLine();
+
+            if (choice.equalsIgnoreCase("yes")) {
+
+                System.out.print("Enter username: ");
+                String username = scanner.nextLine();
+
+                System.out.print("Enter password: ");
+                String password = scanner.nextLine();
+
+                System.out.print("Enter user email: ");
+                String userEmail = scanner.nextLine();
+
+                System.out.print("Enter user phone: ");
+                String userPhone = scanner.nextLine();
+
+                int userId = userService.addUser(
+                        username,
+                        password,
+                        userEmail,
+                        userPhone,
+                        "EMPLOYEE",
+                        employeeId,
+                        null
+                );
+
+                if (userId > 0 ) {
+                    System.out.println(
+                            "Employee user account created successfully."
+                    );
+                } else {
+                    System.out.println(
+                            "Employee added, but failed to create user account."
+                    );
+                }
+            }
         } else {
 
             System.out.println(
@@ -701,13 +761,13 @@ public class ManagerUI {
 
 
     // =========================================================
-    // DELETE EMPLOYEE
+    // DEACTIVE EMPLOYEE
     // =========================================================
 
-    private void deleteEmployee() {
+    private void deactivateEmployee() {
 
         System.out.println(
-                "\n===== Delete Employee ====="
+                "\n===== Deactivate Employee ====="
         );
 
         System.out.print(
@@ -735,9 +795,19 @@ public class ManagerUI {
 
         displayEmployee(employee);
 
+        if (employee.getStatus()
+                .equalsIgnoreCase("INACTIVE")) {
+
+            System.out.println(
+                    "Employee is already inactive."
+            );
+
+            return;
+        }
+
         System.out.print(
-                "\nAre you sure you want to delete "
-                        + "this employee? (yes/no): "
+                "\nAre you sure you want to "
+                        + "deactivate this employee? (yes/no): "
         );
 
         String confirmation =
@@ -746,27 +816,108 @@ public class ManagerUI {
         if (!confirmation.equalsIgnoreCase("yes")) {
 
             System.out.println(
-                    "Delete operation cancelled."
+                    "Deactivation cancelled."
             );
 
             return;
         }
 
         boolean result =
-                employeeService.deleteEmployee(
+                employeeService.deactivateEmployee(
                         employeeId
                 );
 
         if (result) {
 
             System.out.println(
-                    "Employee deleted successfully."
+                    "Employee deactivated successfully."
             );
 
         } else {
 
             System.out.println(
-                    "Failed to delete employee."
+                    "Failed to deactivate employee."
+            );
+        }
+    }
+
+    // =========================================================
+    // ACTIVE EMPLOYEE
+    // =========================================================
+
+    private void activateEmployee() {
+
+        System.out.println(
+                "\n===== Activate Employee ====="
+        );
+
+        System.out.print(
+                "Enter employee ID: "
+        );
+
+        int employeeId =
+                scanner.nextInt();
+
+        scanner.nextLine();
+
+        Employee employee =
+                employeeService.getEmployeeById(
+                        employeeId
+                );
+
+        if (employee == null) {
+
+            System.out.println(
+                    "Employee not found."
+            );
+
+            return;
+        }
+
+        displayEmployee(employee);
+
+        if (employee.getStatus()
+                .equalsIgnoreCase("ACTIVE")) {
+
+            System.out.println(
+                    "Employee is already active."
+            );
+
+            return;
+        }
+
+        System.out.print(
+                "\nAre you sure you want to "
+                        + "activate this employee? (yes/no): "
+        );
+
+        String confirmation =
+                scanner.nextLine();
+
+        if (!confirmation.equalsIgnoreCase("yes")) {
+
+            System.out.println(
+                    "Activation cancelled."
+            );
+
+            return;
+        }
+
+        boolean result =
+                employeeService.activateEmployee(
+                        employeeId
+                );
+
+        if (result) {
+
+            System.out.println(
+                    "Employee activated successfully."
+            );
+
+        } else {
+
+            System.out.println(
+                    "Failed to activate employee."
             );
         }
     }

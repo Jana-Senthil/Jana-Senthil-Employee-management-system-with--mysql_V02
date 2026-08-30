@@ -3,34 +3,55 @@ package org.example.dao;
 import org.example.config.DBConnection;
 import org.example.model.LeaveRequest;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LeaveRequestDAO {
 
-    public boolean addLeaveReqest(int employeeId, String leaveType,
-                               LocalDate startDate, LocalDate endDate,
-                               String leaveReason,LocalDate applyDate) {
-        String sql= "insert into leave_request" +
-                "(employee_id,leave_type,start_date,end_date,reason,applied_date) values(?,?,?,?,?,?)";
-        try(Connection connection = DBConnection.getConnection();
-        PreparedStatement ps = connection.prepareStatement(sql)){
+    public int addLeaveReqest(int employeeId,
+                               String leaveType,
+                               LocalDate startDate,
+                               LocalDate endDate,
+                               String leaveReason,
+                               LocalDate applyDate) {
+
+        String sql = "INSERT INTO leave_request " +
+                "(employee_id, leave_type, start_date, end_date, " +
+                "reason, applied_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     sql,
+                     Statement.RETURN_GENERATED_KEYS
+             )) {
+
             ps.setInt(1, employeeId);
             ps.setString(2, leaveType);
-            ps.setDate(3,java.sql.Date.valueOf(startDate));
-            ps.setDate(4,java.sql.Date.valueOf(endDate));
-            ps.setString(5,leaveReason);
-            ps.setDate(6,java.sql.Date.valueOf(applyDate));
-            int row = ps.executeUpdate();
-            return row>0;
-        }catch (SQLException e){
-            return false;
+            ps.setDate(3, java.sql.Date.valueOf(startDate));
+            ps.setDate(4, java.sql.Date.valueOf(endDate));
+            ps.setString(5, leaveReason);
+            ps.setDate(6, java.sql.Date.valueOf(applyDate));
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+
+                ResultSet rs = ps.getGeneratedKeys();
+
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database Error: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return 0;
     }
 
     public boolean updateLeaveRequestByManager(int leaveId, int manager_id, String manager_comment,String status){
